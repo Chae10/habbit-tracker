@@ -112,14 +112,15 @@ st.altair_chart(chart, use_container_width=True)
 # =========================
 # API 함수
 # =========================
+@st.cache_data(ttl=600)
 def get_weather(city, api_key):
     if not api_key:
-        return None
+        return "날씨 API 키 없음"
     try:
         res = requests.get(
             "https://api.openweathermap.org/data/2.5/weather",
             params={
-                "q": city,
+                "q": f"{city},KR",
                 "appid": api_key,
                 "units": "metric",
                 "lang": "kr"
@@ -127,13 +128,14 @@ def get_weather(city, api_key):
             timeout=10
         )
         if res.status_code != 200:
-            return None
+            return "날씨 정보 없음"
         data = res.json()
         return f"{data['weather'][0]['description']} / {data['main']['temp']}°C"
     except:
-        return None
+        return "날씨 정보 없음"
 
 
+@st.cache_data(ttl=600)
 def get_dog_image():
     try:
         res = requests.get("https://dog.ceo/api/breeds/image/random", timeout=10)
@@ -188,7 +190,7 @@ def generate_report(habits, mood, weather, breed, style, api_key):
 # =========================
 st.markdown("---")
 if st.button("🧠 컨디션 리포트 생성"):
-    weather = get_weather(city, weather_api_key) or "날씨 정보 없음"
+    weather = get_weather(city, weather_api_key)
     dog = get_dog_image()
 
     col_w, col_d = st.columns(2)
